@@ -1,0 +1,53 @@
+<!-- views/index.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Middl</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+</head>
+<body>
+<div class="container">
+
+	<div class="jumbotron text-center">
+		<img src="middl.jpg" style="background:none">
+		<h1><span class="fa fa-lock"></span>&nbsp;&nbsp;Welcome to Middl.net!</h1>
+
+		<p>Join the fun at:</p>
+
+		<a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+	</div>
+
+	<div class="jumbotron">
+	
+		<h1> How It Works </h1>
+
+		<font size="3">
+			<p> 
+			Middl let you make two friends talk to each other and allows you to listen in on the conversation.
+			</p>
+
+			<p> <b>1)</b> Let's call your friends Alice and Bob. </p>
+		<img src="middl1.png"/>
+		<p> <b>2)</b> You begin the conversation by sending "Yo!" to Alice. She will see that you messaged her "Yo!".</p>
+		<img src="middl2.png"/>
+		<p> <b>3)</b> Alice responds to your "Yo!" with a "Hey!". You recieve the "Hey!" and Middl detects the message.</p>
+		<img src="middl6.png"/>
+		<p> <b>4)</b> Middl forwards the "Hey!" through your profile and onto Bob.
+		Now Bob will see that you messaged him "Hey!".</p>
+		<img src="middl5.png"/>
+		<p> <b>5)</b> Bob responds and the message is again intercepted by Middl. </p> 
+		<img src="middl7.png"/>
+		<p> <b>6)</b> Middl forwards Bob's message to Alice. Alice thinks she is chatting with you but she is actually chatting with Bob! </p> 
+		<img src="middl8.png"/>
+		<p> <b>7)</b> Go find out what its like to get caught in the Middl! </p> 
+		</font>
+
+	</div>
+
+</div>
+</body>
+</html>

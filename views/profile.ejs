@@ -1,0 +1,569 @@
+<!-- views/profile.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Middl</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+	<script src='strophe.js'></script>
+	<script src='facebook.js'></script>
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/select2/3.4.8/select2.css">
+	<script src="//cdn.jsdelivr.net/select2/3.4.8/select2.js"></script>
+	<script src="//cdn.jsdelivr.net/select2/3.4.8/select2.min.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<link rel="stylesheet" href="default.css">
+
+	<style>
+  #person1 {width:90%}
+  #person2 {width:90%}
+  #dialog label, #dialog input { display:block; }
+  #dialog label { margin-top: 0.5em; }
+  #dialog input, #dialog textarea { width: 95%; }
+  #tabs { margin-top: 1em; }
+  #tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+  #add_tab { cursor: pointer; }
+  .container, html, body {height: 100%}
+	div.well {height: 100%}
+	div.row.mainrow {height: 80%}
+	div.col-sm-12 {height: 100%}
+	#tabs {height: calc(100% - 67px)}
+	.ui-tabs-panel {overflow-y:scroll; height: calc(100% - 67px)}
+	.navlink {font-size:1.5em}
+	body {margin-top:-60px}
+  </style>
+
+	  <script>
+  $(function() {
+
+
+
+    var tabTitle = $( "#tab_title" ),
+      tabContent = $( "#tab_content" ),
+      tabTemplate = "<li><a class='.individualtab' href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>",
+			tabCounter = <%= user.facebook.pairList.length%> + 2;
+ 
+    var tabs = $( "#tabs" ).tabs();
+		updateChat = function() {
+			var panelId = $("li.ui-state-active").children("a").attr("href");
+
+			var sender = $(panelId).data("sender");
+			var receiver = $(panelId).data("receiver");
+
+			var pair = sender + "|" + receiver + "|" + <%= user.facebook.id %>;
+			console.log(pair);
+
+			if (sender && receiver) {
+				var parameters = {pair: pair};
+				
+				$.post("http://middl.net/fetchrecord", parameters, function(data) {
+					  var messageList = JSON.parse(data);
+						$(panelId).empty();
+						for (var i = 0; i < messageList.length; i++) {
+							var divToAdd = $("<div></div>");
+							if (messageList[i].author === "SENDER") {
+								var msgToAdd = $('<blockquote class="example-right"></blockquote>').append(
+									$('<p></p>').text(messageList[i].message)
+								);
+								divToAdd.append(msgToAdd);
+								divToAdd.append($('<p></p>').html("<b>" + frienddict[sender] + "</b> " + messageList[i].timestamp));
+							}
+							else {
+								var msgToAdd = $('<blockquote class="example-obtuse"></blockquote>').append(
+									$('<p></p>').text(messageList[i].message)
+								);
+								divToAdd.append(msgToAdd);
+								divToAdd.append($('<p></p>').html("<b>" + frienddict[receiver] + "</b> " + messageList[i].timestamp));
+							}
+
+							$(panelId).append(divToAdd);
+						}
+				});
+			}
+		}
+
+		$("#warn_sender").click(function(e) {
+			var panelId = $("li.ui-state-active").children("a").attr("href");
+				if (confirm("Are you sure you want to warn " + frienddict[$(panelId).data("sender")] + "?"))
+				{
+			    var sender = $(panelId).data("sender");
+					sendMessageCustom("You are actually talking to " + frienddict[$(panelId).data("receiver")] + " using Middl. They don't know it yet though, so feel free to continue to conversation. If you are confused, find out how this works at http://middl.net", sender);
+					alert(frienddict[$(panelId).data("sender")] + " was notified that they are talking to " + frienddict[$(panelId).data("receiver")] + ".");
+				  
+					} else {
+					e.preventDefault();
+					}
+
+				});
+
+		$("#warn_receiver").click(function(e) {
+			var panelId = $("li.ui-state-active").children("a").attr("href");
+				if (confirm("Are you sure you want to warn " + frienddict[$(panelId).data("receiver")] + "?"))
+				{
+			    var receiver = $(panelId).data("receiver");
+					sendMessageCustom("You are actually talking to " + frienddict[$(panelId).data("sender")] + " using Middl. They don't know it yet though, so feel free to continue the conversation. If you are confused, find out how this works at http://middl.net", receiver);
+					alert(frienddict[$(panelId).data("receiver")] + " was notified that they are talking to " + frienddict[$(panelId).data("sender")] + ".");
+				  
+					} else {
+					e.preventDefault();
+					}
+
+				});
+		
+		$("#warn_both").click(function(e) {
+			var panelId = $("li.ui-state-active").children("a").attr("href");
+				if (confirm("Are you sure?"))
+				{
+					var sender = $(panelId).data("sender");
+			    var receiver = $(panelId).data("receiver");
+					sendMessageCustom("You've been Middl'd! You were actually talking to " + frienddict[$(panelId).data("sender")] + " the whole time! If you are confused, find out how this works at http://middl.net", receiver);
+					sendMessageCustom("You've been Middl'd! You were actually talking to " + frienddict[$(panelId).data("receiver")] + " the whole time! If you are confused, find out how this works at http://middl.net", sender);
+					alert("The gig is now up.");
+				  
+					} else {
+					e.preventDefault();
+					}
+
+				});
+
+
+
+		$("#tabs").bind("click", "a.individualtab", function(event) {
+			var panelId = $("li.ui-state-active").children("a").attr("href");
+			if (panelId === "#tabs-1") {
+				$("#warn_sender").hide();
+				$("#warn_receiver").hide();
+				$("#warn_both").hide();
+				}
+			else {
+				$("#warn_sender").show();
+				$("#warn_receiver").show();
+				$("#warn_both").show();
+				}
+			
+		 updateChat();	
+			
+			});
+ 
+    // modal dialog init: custom buttons and a "close" callback resetting the form inside
+    var dialog = $( "#dialog" ).dialog({
+      autoOpen: false,
+      modal: true,
+      buttons: {
+        Add: function() {
+          addTabHelper();
+          //$( this ).dialog( "close" );
+        },
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+        form[ 0 ].reset();
+      }
+    });
+ 
+    // addTab form: calls addTab function on submit and closes the dialog
+    var form = dialog.find( "form" ).submit(function( event ) {
+      addTabHelper();
+      dialog.dialog( "close" );
+      event.preventDefault();
+    });
+
+		getTimestamp = function() {
+			var d = new Date();
+			return "" + d;
+		}
+
+		function addTabHelper() {
+			var sender = $("#person1 option:selected").val();
+			var receiver = $("#person2 option:selected").val();
+			var message = $("#initMessage").val();
+
+			var parameters = {id: "" + <%= user.facebook.id %>, sender: sender, receiver: receiver}
+			$.post("http://middl.net/addpair", parameters, function(data) {
+					console.log("SUCCCCCCESSSS!");
+					sendMessageCustom(message, receiver);
+					pairList.push({sender: sender, receiver: receiver});
+						var parameters = {message: message, pair: sender + "|" + receiver + "|" + <%= user.facebook.id %>, id: "SENDER", timestamp: getTimestamp()};
+				$.post("http://middl.net/addmessage", parameters, function(data) {
+						console.log("SUCCESS!");
+						updateChat();
+						addTab();
+						$("#dialog").dialog("close");
+						$("#dialogErrors").hide();
+
+				});
+			})
+			.fail(function(xhr, textStatus, errorThrown) {
+					$("#dialogErrors").text("Error: " + xhr.responseText);
+					$("#dialogErrors").show();
+					$(".ui-dialog").effect("shake", {times: 3}, 80);
+					});
+		}
+
+ 
+    // actual addTab function: adds new tab using the input from the form above
+    function addTab() {
+			var label = '<img src="http://graph.facebook.com/' + $("#person1 option:selected").val() + '/picture">' + '<span class="glyphicon glyphicon-flash">' + '</span>' +  '<img src="http://graph.facebook.com/' + $("#person2 option:selected").val() + '/picture">',
+        id = "tabs-" + tabCounter,
+        li = $( tabTemplate.replace( /#\{href\}/g, "#" + id ).replace( /#\{label\}/g, label ) ),
+        tabContentHtml = "Conversation between " + $("#person1 option:selected").val() + " and " + $("#person2 option:selected").val() + " in progress.";
+ 
+      tabs.find( ".ui-tabs-nav" ).append( li );
+      tabs.append( "<div data-sender='" 
+					+ $("#person1 option:selected").val() 
+					+ "' data-receiver='" + 
+					$("#person2 option:selected").val() + "' id='" 
+					+ id + "'><p>" 
+					+ tabContentHtml + "</p></div>" );
+      tabs.tabs( "refresh" );
+      tabCounter++;
+
+
+    }
+
+ 
+    // addTab button: just opens the dialog
+    $( "#add_tab" )
+      .button()
+      .click(function() {
+        dialog.dialog( "open" );
+      });
+ 
+    // close icon: removing the tab on click
+    tabs.delegate( "span.ui-icon-close", "click", function() {
+        var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
+				var parameters = {id: "" + <%= user.facebook.id %>, sender: $("#" + panelId).data("sender"), receiver: $("#" + panelId).data("receiver"), timestamp: getTimestamp()}
+				var idx = -1;
+				for (var i = 0; i < pairList.length; i++) {
+					if (pairList[i].sender == $("#" + panelId).data("sender")
+						   && pairList[i].receiver == $("#" + panelId).data("receiver")) {
+						idx = i;
+						break;
+					}
+				}
+				if (idx === -1) {
+				   console.log("idx not found");
+				}
+				else {
+					pairList.splice(idx, 1);
+					$.post("http://middl.net/delpair", parameters, function(data) {
+						$( "#" + panelId ).remove();
+						tabs.tabs( "refresh" );
+						console.log("SUccESS!");
+					});
+				}
+    });
+ 
+  });
+  </script>
+
+	<script>
+		var connection = null;
+		var pairList = <%- JSON.stringify(user.facebook.pairList) %>;
+		nicknames = <%- JSON.stringify(user.facebook.nicknames) %>;
+
+
+
+		function log(msg) {
+			$('#log').append($('<div></div>').text(msg));
+		}
+
+		function onConnect(status) {
+			if (status == Strophe.Status.CONNECTING) {
+				console.log('Strophe is connecting.');
+			} else if (status == Strophe.Status.CONNFAIL) {
+				console.log('Strophe failed to connect.');
+				$('#connect').get(0).value = 'connect';
+			} else if (status == Strophe.Status.DISCONNECTING) {
+				console.log('Strophe is disconnecting.');
+			} else if (status == Strophe.Status.DISCONNECTED) {
+				console.log('Strophe is disconnected.');
+				$('#connect').get(0).value = 'connect';
+			} else if (status == Strophe.Status.CONNECTED) {
+				console.log('Strophe is connected.');
+				console.log('Send a message to ' + connection.jid +
+				' to talk to me.');
+
+				connection.addHandler(onMessage, null, 'message', null, null,  null);
+				connection.send($pres().tree());
+			}
+		}
+
+		function onMessage(msg) {
+			var to = msg.getAttribute('to');
+			var from = msg.getAttribute('from');
+			var type = msg.getAttribute('type');
+			var elems = msg.getElementsByTagName('body');
+
+
+			if (type == "chat" && elems.length > 0) {
+				var body = elems[0];
+
+				console.log('I got a message from ' + from + ': ' +
+				Strophe.getText(body));
+
+				for (var i = 0; i < pairList.length; i++) {
+					console.log(pairList[i].sender);
+					console.log(from.replace( /^\D+/g, ''));
+					if (pairList[i].sender == from.replace( /\D+/g, '')) {
+						console.log("SENDER BELL");
+						var toSend = Strophe.getText(body);
+						for (var j = 0; j < nicknames.length; j++) {
+							toSend = toSend.replace(new RegExp('(' + nicknames[j] + ')', 'gi'), frienddict[pairList[i].receiver]);
+						}
+
+						
+						sendMessageCustom(toSend, pairList[i].receiver);
+						//send to receiver
+						var parameters = {message: toSend, pair: pairList[i].sender + "|" + pairList[i].receiver + "|" + <%= user.facebook.id %>, id: "SENDER", timestamp: getTimestamp()};
+				$.post("http://middl.net/addmessage", parameters, function(data) {
+						console.log("SUCCESS!");
+						updateChat();
+				});
+						break;
+					}
+					if (pairList[i].receiver == from.replace( /\D+/g, '')) {
+						console.log("RECEIVER BELL");
+						var toSend = Strophe.getText(body);
+						for (var j = 0; j < nicknames.length; j++) {
+							toSend = toSend.replace(new RegExp('(' + nicknames[j] + ')', 'gi'), frienddict[pairList[i].sender]);
+						}
+						sendMessageCustom(toSend, pairList[i].sender);
+						// send to sender
+						var parameters = {message: toSend, pair: pairList[i].sender + "|" + pairList[i].receiver + "|" + <%= user.facebook.id %>, id: "RECEIVER", timestamp: getTimestamp()};
+				$.post("http://middl.net/addmessage", parameters, function(data) {
+						console.log("SUCCESS!");
+						updateChat();
+				});
+						break;
+					}
+				}
+
+
+			}
+
+			// we must return true to keep the handler alive.
+			// returning false would remove it after it finishes.
+			return true;
+		}
+		function sendMessageCustom(message, address) {
+			var to = '-' + address + "@chat.facebook.com";
+			
+			if(message && to){
+				var reply = $msg({
+					to: to,
+					type: 'chat'
+				})
+				.cnode(Strophe.xmlElement('body', message));
+				connection.send(reply.tree());
+
+				console.log('I sent ' + to + ': ' + message);
+			}
+		}
+
+		
+
+		function sendMessage() {
+			var message = $('#messageInputbox').val();
+			var to = '-' + $('#recipientDropdown option:selected').val() + "@chat.facebook.com";
+			
+			if(message && to){
+				var reply = $msg({
+					to: to,
+					type: 'chat'
+				})
+				.cnode(Strophe.xmlElement('body', message));
+				connection.send(reply.tree());
+
+				console.log('I sent ' + to + ': ' + message);
+			}
+		}
+
+		friendlist = null;
+		frienddict = {};
+
+		$(document).bind('FBSDKLoaded', function () {
+			connection = new Strophe.Connection('http://middl.net:7070/http-bind/');
+
+			// Uncomment the following lines to spy on the wire traffic.
+			//connection.rawInput = function (data) { log('RECV: ' + data); };
+			//connection.rawOutput = function (data) { log('SEND: ' + data); };
+
+			// Uncomment the following line to see all the debug output.
+			//Strophe.log = function (level, msg) { log('LOG: ' + msg); };
+			
+			$('#send').bind('click', function () {
+				sendMessage();
+			});
+
+
+
+
+			FB.getLoginStatus(function(response) {
+				if (response.authResponse) {
+
+					FB.api('/me/friends', function(response) {
+							 friendlist = response.data;
+							 friendlist.sort(function(a,b) {
+								     if (a.name > b.name) return 1;
+										     else if (a.name < b.name) return -1;
+												     else return 0
+														 })
+							 $.each(friendlist, function(idx, value) {
+								 frienddict[value.id] = value.name;
+								 $(".friendSelector").append(
+									 $("<option></option>").val(value.id).text(value.name)
+								 );
+							 });
+					});
+					console.log(FB);
+					connection.facebookConnect(
+						response.authResponse.userID + "@chat.facebook.com/test", 
+						onConnect, 
+						60,
+						1, 
+						FB._apiKey,
+						response.authResponse.accessToken
+						);
+				}
+				else {
+				  connection.disconnect();
+				}
+
+			});
+		});
+
+
+	</script>
+	<style>
+		body 		{ padding-top:80px; word-wrap:break-word; }
+	</style>
+</head>
+<body>
+<div id="fb-root"></div>
+<div class="container">
+
+
+		<div class="row">
+		<div class="col-sm-12">
+		<nav class="navbar navbar-default" role="navigation">
+   <div class="navbar-header">
+		 <a class="navbar-brand navhead" style="color:black;font-family:arial,sans-serif" href="https://www.facebook.com/middlnet"><img style="max-width:40px;margin-top:-20px;margin-bottom:-16px" src="middl.jpg">&nbsp;&nbsp;<%= user.facebook.name %></a>
+   </div>
+   <div>
+      <ul class="nav navbar-nav">
+         <li class="active"><a class="navlink" href="#">Conversations</a></li>
+				 <li><a class="navlink" href="/howitworks">How it Works</a></li>
+         <li><a class="navlink" href="/archive">Archive</a></li>
+         <li><a class="navlink" href="/faq">FAQ</a></li>
+				 <li><a class="navlink" href="/namereplace">Name Replacement</a></li>
+         <li><a class="navlink" href="/contact">Contact</a></li>
+				 <li><a class="navlink" href="/logout">Logout</a></li>
+      </ul>
+   </div>
+</nav>
+	 </div>
+
+</div>
+
+	<div class="row mainrow">
+
+
+		<!-- FACEBOOK INFORMATION -->
+		<div class="col-sm-12">
+			<div class="well">
+
+			<div id="dialog" title="Starting Middl Conversation">
+				<div id="dialogErrors" style="color:red;display:none">Error Error Error</div>
+				<form id="startConversationForm">
+					<fieldset class="ui-helper-reset">
+						<label for="person1">Person 1 (Sender) </label>
+						<select id="person1" class="friendSelector"><option value="" disabled selected>Select a friend</option></select>
+						<label for="person2">Person 2 (Receiver) </label>
+						<select id="person2" class="friendSelector"><option value="" disabled selected>Select a friend</option></select>
+						<label for="initMessage">Initial Message</label>
+						<textarea name="initMessage" id="initMessage" class="ui-widget-content ui-corner-all">Yo!</textarea>
+					</fieldset>
+				</form>
+			</div>
+ 
+			<button class="btn btn-success btn-small" id="add_tab"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add Conversation</button>
+			<button style="display:none" class="btn btn-warning btn-small" id="warn_sender"><span class="glyphicon glyphicon-eye-close"></span>&nbsp;&nbsp;Warn Sender </button>
+			<button style="display:none" class="btn btn-warning btn-small" id="warn_receiver"><span class="glyphicon glyphicon-eye-close"></span>&nbsp;&nbsp;Warn Receiver </button>
+			<button style="display:none" class="btn btn-danger btn-small" id="warn_both"><span class="glyphicon glyphicon-eye-open"></span>&nbsp;&nbsp;Reveal </button>
+			
+				<div id="tabs">
+					<ul>
+						<li><a href="#tabs-1"><img src="http://graph.facebook.com/<%= user.facebook.id %>/picture">&nbsp;&nbsp;&nbsp;<b>Welcome to Middl!</b></a> </li>
+						<% for (var i = 0; i < user.facebook.pairList.length; i++) { %>
+						<li><a class=".individualtab" href="#tabs-<%= i+2 %>"><img src="http://graph.facebook.com/<%= user.facebook.pairList[i].sender %>/picture"><span class="glyphicon glyphicon-flash"></span><img src="http://graph.facebook.com/<%= user.facebook.pairList[i].receiver %>/picture"></a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
+						<% } %>
+					</ul>
+					<div id="tabs-1">
+						<p>Click "Add Converation" above to start a conversation between your friends!</p>
+						<hr>
+						<div class="fb-like" data-href="https://www.facebook.com/middlnet" data-layout="standard" data-action="like" data-show-faces="true" data-share="true"></div>
+					</div>
+					<% for (var i = 0; i < user.facebook.pairList.length; i++) { %>
+					<div data-sender="<%= user.facebook.pairList[i].sender %>" data-receiver="<%= user.facebook.pairList[i].receiver%>" id="tabs-<%= i+2 %>">Loaded Conversation between <%= user.facebook.pairList[i].sender %> and <%= user.facebook.pairList[i].receiver %></div>
+					 <% } %>
+
+				</div>
+			</div>
+
+			
+	<div id="footer" style="text-align:center">
+		Copyright &copy; 2014 &middot; All Rights Reserved &middot; <a href="http://www.middl.net"> Middl </a>
+																											        </div>
+
+		</div>
+
+		<!-- CHAT INFORMATION
+		<div class="col-sm-6">
+			<div class="well">
+				<div class="row">
+					<select style="width:100%" class="friendSelector"> 
+						<option></option>
+					</select>
+
+				</div>
+				<div class="row">
+					<label for='message'>
+						message:
+					</label>
+					<input type='text' id='messageInputbox'>
+					<input type='button' id='send' value='send'>
+			</div>
+			</div>
+		</div>
+		-->
+				
+
+	</div>
+
+</div>
+	<script>
+  window.fbAsyncInit = function() {
+	     FB.init({appId: '321198970642', status: true, cookie: true,
+			              xfbml: true});
+
+		     jQuery(document).trigger('FBSDKLoaded');
+	
+		     if (window.fbAsyncInited) {
+			     fbAsyncInited();
+			   }
+	   };
+   (function() {
+		     var e = document.createElement('script');
+		     e.async = true;
+		     e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+		     document.getElementById('fb-root').appendChild(e);
+		   }());
+ </script>
+</body>
+</html>
+

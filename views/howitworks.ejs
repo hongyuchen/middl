@@ -1,0 +1,126 @@
+<!--views/howitworks.ejs -->
+<!doctype html>
+
+<html>
+<head>
+	<title>Middl</title>
+	<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+	<script src='strophe.js'></script>
+	<script src='facebook.js'></script>
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/select2/3.4.8/select2.css">
+	<script src="//cdn.jsdelivr.net/select2/3.4.8/select2.js"></script>
+	<script src="//cdn.jsdelivr.net/select2/3.4.8/select2.min.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<link rel="stylesheet" href="default.css">
+
+	<style>
+  #person1 {width:90%}
+  #person2 {width:90%}
+  #dialog label, #dialog input { display:block; }
+  #dialog label { margin-top: 0.5em; }
+  #dialog input, #dialog textarea { width: 95%; }
+  #tabs { margin-top: 1em; }
+  #tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+  #add_tab { cursor: pointer; }
+  .container, html, body {height: 100%}
+	div.well {height: 100%}
+	div.row.mainrow {height: 80%}
+	div.col-sm-12 {height: 100%}
+	#tabs {height: calc(100% - 67px)}
+	.ui-tabs-panel {overflow-y:scroll; height: calc(100% - 67px)}
+	.navlink {font-size:1.5em}
+	body {margin-top:20px}
+  </style>
+</head>
+<body>
+<div id="fb-root"></div>
+<div class="container">
+
+
+		<div class="row">
+		<div class="col-sm-12">
+		<nav class="navbar navbar-default" role="navigation">
+   <div class="navbar-header">
+		 <a class="navbar-brand navhead" style="color:black;font-family:arial,sans-serif" href="https://www.facebook.com/middlnet"><img style="max-width:40px;margin-top:-20px;margin-bottom:-16px" src="middl.jpg">&nbsp;&nbsp;<%= user.facebook.name %></a>
+   </div>
+   <div>
+      <ul class="nav navbar-nav">
+         <li><a class="navlink" href="/profile">Conversations</a></li>
+				 <li class="active"><a class="navlink" href="#">How it Works</a></li>
+         <li><a class="navlink" href="/archive">Archive</a></li>
+         <li><a class="navlink" href="/faq">FAQ</a></li>
+				 <li><a class="navlink" href="/namereplace">Name Replacement</a></li>
+         <li><a class="navlink" href="/contact">Contact</a></li>
+				 <li><a class="navlink" href="/logout">Logout</a></li>
+      </ul>
+   </div>
+</nav>
+	 </div>
+
+</div>
+
+	<div class="row mainrow">
+
+
+		<!-- FACEBOOK INFORMATION -->
+		<div class="col-sm-12">
+			<div class="well" style="overflow-y:scroll">
+			
+				<h1> How It Works </h1>
+
+				<font size="3">
+					<p> 
+				  Middl routes Facebook messages from your friends through your profile automatically.
+					To set up a conversation using Middl follow the simple example show below. 
+					</p>
+
+					<p> <b>1)</b> Select two of your friends by clicking Add Conversation in the Conversations tab. Let's call your friends Alice and Bob. </p>
+				<img src="middl1.png"/>
+				<p> <b>2)</b> Choose a starting message or simply send "Yo!". Alice, the reciever, will see that you messaged her "Yo!".</p>
+				<img src="middl2.png"/>
+				<p> <b>3)</b> Alice responds to your "Yo!" with a "Hey!". You recieve the "Hey!" and Middl detects the message.</p>
+				<img src="middl6.png"/>
+				<p> <b>4)</b> Middl forwards the "Hey!" through your profile and onto Bob.
+		  	Now Bob will see that you messaged him "Hey!". Middl will connect your friends through your profile as long as the window stays open.</p>
+				<img src="middl5.png"/>
+				<p> <b>5)</b> Bob responds and the message is again intercepted by Middl. </p> 
+      	<img src="middl7.png"/>
+				<p> <b>6)</b> Middl forwards Bob's message to Alice. Alice thinks she is chatting with you but she is actually chatting with Bob! </p> 
+				<img src="middl8.png"/>
+				<p> <b>7)</b> Go find out what its like to get caught in the Middl! </p> 
+			  </font>
+
+			</div>
+		</div>
+
+
+	</div>
+	<div id="footer" style="text-align:center">
+		Copyright &copy; 2014 &middot; All Rights Reserved &middot; <a href="http://www.middl.net"> Middl </a>
+																											        </div>
+
+</div>
+	<script>
+  window.fbAsyncInit = function() {
+	     FB.init({appId: '321198970642', status: true, cookie: true,
+			              xfbml: true});
+
+		     jQuery(document).trigger('FBSDKLoaded');
+	
+		     if (window.fbAsyncInited) {
+			     fbAsyncInited();
+			   }
+	   };
+   (function() {
+		     var e = document.createElement('script');
+		     e.async = true;
+		     e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+		     document.getElementById('fb-root').appendChild(e);
+		   }());
+ </script>
+</body>
+</html>
+
