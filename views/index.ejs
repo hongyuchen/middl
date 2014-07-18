@@ -1,36 +1,70 @@
 <!-- views/index.ejs -->
 <!doctype html>
+<meta name="wot-verification" content="dce74d40f1a80129abd7"/>
 <html>
 <head>
 	<title>Middl</title>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> <!-- load bootstrap css -->
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
-	<style>
-		body 		{ padding-top:80px; }
-	</style>
+	<link rel="stylesheet" href="bootstrap.css">
+	<script>
+$("nav").find("a").click(function(e) {
+		    e.preventDefault();
+				    var section = $(this).attr("href");
+						    $("html, body").animate({
+									        scrollTop: $(section).offset().top
+													    });
+								});
+
+  </script>
 </head>
 <body>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+   <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" 
+         data-target="#example-navbar-collapse">
+         <span class="sr-only">Toggle navigation</span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+      </button>
+			<a class="navbar-brand" href="#">Middl</a>
+   </div>
+   <div class="collapse navbar-collapse" id="example-navbar-collapse">
+      <ul class="nav navbar-nav">
+         <li class="active"><a href="#">Welcome</a></li>
+				 <li><a href="#hiwanchor">How It Works</a></li>
+         <li><a href="#faqanchor">FAQ</a></li>
+         <li><a href="#contactanchor">Contact</a></li>
+         
+      </ul>
+   </div>
+</nav>
 <div class="container">
 
-	<div class="jumbotron text-center">
-		<img src="middl.jpg" style="background:none">
-		<h1><span class="fa fa-lock"></span>&nbsp;&nbsp;Welcome to Middl.net!</h1>
+	<div style="margin-top:80px" class="jumbotron">
+		<div class="row">
+			<div class="col-md-2">
+				<img style="margin-top:35px" src="middl.jpg">
 
-		<p>Join the fun at:</p>
+			</div>
+			<div class="col-md-9 pull-right">
+				<h1>Get caught in the Middl.</h1>
 
-		<a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+				<p>Start a Facebook conversation between two friends, and listen in.</p>
+
+				<a href="/auth/facebook" class="btn btn-info"><span class="fa fa-facebook"></span> Log in with Facebook</a>
+			</div>
+		</div>
 	</div>
 
-	<div class="jumbotron">
+	<div id="hiwanchor" class="well">
 	
 		<h1> How It Works </h1>
 
 		<font size="3">
-			<p> 
-			Middl let you make two friends talk to each other and allows you to listen in on the conversation.
-			</p>
 
-			<p> <b>1)</b> Let's call your friends Alice and Bob. </p>
+			<p> <b>1)</b> You first select two friends from your list of Facebook friends. Let's call your friends Alice and Bob. </p>
 		<img src="middl1.png"/>
 		<p> <b>2)</b> You begin the conversation by sending "Yo!" to Alice. She will see that you messaged her "Yo!".</p>
 		<img src="middl2.png"/>
@@ -41,13 +75,69 @@
 		<img src="middl5.png"/>
 		<p> <b>5)</b> Bob responds and the message is again intercepted by Middl. </p> 
 		<img src="middl7.png"/>
-		<p> <b>6)</b> Middl forwards Bob's message to Alice. Alice thinks she is chatting with you but she is actually chatting with Bob! </p> 
+		<p> <b>6)</b> Middl forwards Bob's message to Alice. Alice and Bob now both think they are talking to you, but they are actually talking to each other! </p> 
 		<img src="middl8.png"/>
 		<p> <b>7)</b> Go find out what its like to get caught in the Middl! </p> 
 		</font>
 
 	</div>
+			<div id="faqanchor" class="well" style="overflow-y:auto;">
+			
+				<h1> Frequently Asked Questions </h1>
+		    
+				<font size="3">
+
+					<div class="faqitem">
+					<p><b>Q:</b> How do I start a Middl conversation?</p>
+					<p><b>A:</b> Click "Conversations" on the main naviation bar, and click "Add Conversation". Select your two friends and the starting message. Click "Add". </p>
+				  </div> 
+
+					<hr>
+					
+					<div class="faqitem">
+					<p><b>Q:</b> How do I delete a Middl conversation?</p>
+					<p><b>A:</b> Simply close the conversation tab. </p>
+				  </div> 
+
+					<hr>
+
+					<div class="faqitem">
+					<p><b>Q:</b> What do the "Warn Sender", "Warn Receiver", and "Reveal" buttons do?</p>
+					<p><b>A:</b> Warn sender lets the first person know the true identity of the second. Warn receiver lets the second person know the true identity of the first. Reveal lets both know. </p>
+				  </div> 
+
+					<hr>
+
+					<div class="faqitem">
+					<p><b>Q:</b> What is name replacement/How do I replace names? </p>
+					<p><b>A:</b> Click on "Name Replacement" in the main navigation bar, and follow the instructions. </p>
+				  </div> 
+
+					<hr>
+					
+					<div class="faqitem">
+					<p><b>Q:</b> How do I see old conversations? </p>
+					<p><b>A:</b> Click on "Archive" in the main navigation bar, and follow the instructions.  </p>
+				  </div> 
+
+
+
+				</font>
+				
+				  
+			</div>
+			<div id="contactanchor" class="well">
+			
+				<h1> Contact </h1>
+        <font size="3">
+					<p> You can contact us by sending a message to <a href="mailto:info@middl.net"> info@middl.net </a>. </p>	
+				</font>
+		
+			</div>
 
 </div>
+	<div id="footer" style="position:fixed;left:0;bottom:0;right:0;text-align:center">
+		Copyright &copy; 2014 &middot; All Rights Reserved &middot; <a href="http://www.middl.net"> Middl </a>
+																											        </div>
 </body>
 </html>

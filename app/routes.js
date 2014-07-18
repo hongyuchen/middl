@@ -3,6 +3,11 @@
 var Message = require('../app/models/message');
 var User = require('../app/models/user');
 var crypto = require('crypto');
+var ltx = require('ltx');
+var Client = require('../index.js');
+var request = require('request');
+
+clientlist = {};
 
 module.exports = function(app, passport) {
 
@@ -27,6 +32,245 @@ module.exports = function(app, passport) {
 				res.send(5, "User not found.");
 			}
 		});
+	});
+
+  // =====================================
+	// SEND MESSAGE REQUEST ================
+	// =====================================
+	
+	app.post('/sendmessage', isLoggedIn, function(req, res) {
+		console.log("New Send Message Request. Was " + JSON.stringify(req.body));
+		if (clientlist[req.body.id]) {
+			console.log("Connection found.");
+
+			var chat = new ltx.Element('message', { to: '-' + req.body.recipient + '@chat.facebook.com' })
+					.c('body')
+					.t(req.body.message);
+			clientlist[req.body.id].send(chat);
+
+
+		  res.send("Success!");
+
+
+		}
+		else {
+			console.log("ID not found!");
+			res.send(5, "ID not found.");
+		}
+
+
+	});
+
+
+	// =====================================
+	// SERVER SIDE CONNECTION REQUEST ======
+	// =====================================
+	
+	app.post('/addserverconnection', isLoggedIn, function(req, res) {
+		console.log("New Server Connection Request. Was " + JSON.stringify(req.body));
+		var insertid = req.body.id;
+		var longtoken = req.body.token;
+
+		if (! clientlist[insertid] || clientlist[insertid].state !== 5) {
+			console.log("Connection not found. Making!");
+
+			//get long-term access token
+			
+			request({
+				uri: "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=321198970642&client_secret=7f6d582b099dc065d4b7c75c227d5f33&fb_exchange_token=" + req.body.token,
+				method: "GET",
+				timeout: 10000,
+				followRedirect: true,
+				maxRedirects: 10
+			}, function(error, response, body) {
+				console.log(body.substring(body.indexOf("=") + 1, body.indexOf("&")));
+				longtoken = body.substring(body.indexOf("=") + 1, body.indexOf("&"));
+
+
+			var client = new Client({
+				jid: '-' + insertid + "@chat.facebook.com",
+				api_key: '321198970642',
+				secret_key: '7f6d582b099dc065d4b7c75c227d5f33',
+				access_token: longtoken
+			});
+
+			client.on("error", function() {
+				console.log("ERROR");
+			});
+
+			client.on('stanza', function(stanza) {
+				if (stanza.is('message') &&
+					(stanza.attrs.type !== 'error')) {
+						// Get id from received message
+						var fromID = stanza.attrs.from.substring(1, stanza.attrs.from.indexOf("@"));
+						var messageBody = stanza.getChildText('body');
+
+						if (! messageBody) {
+							return;
+						}
+
+						console.log("MESSAGE RECEIVED FROM ID: " + fromID);
+
+							User.findOne({'facebook.id' : client.jid.user.substring(1)}, function(err, doc) {
+								if (doc) {
+									var nicknames = doc.facebook.nicknames;
+									nicknames.sort(function(a, b) {
+										return b.length - a.length;
+									});
+									for (var i = 0; i < doc.facebook.pairList.length; i++) {
+										if (doc.facebook.pairList[i].sender == fromID) {
+											//sending message
+											stanza.attrs.to = "-" + doc.facebook.pairList[i].receiver + "@chat.facebook.com";
+											delete stanza.attrs.from
+								      var redacted = messageBody;
+
+											request({
+												uri: "https://graph.facebook.com/" + doc.facebook.pairList[i].receiver,
+												method: "GET",
+												timeout: 10000,
+												followRedirect: true,
+												maxRedirects: 10
+											}, function(error, response, body) {
+																			for (var j = 0; j < nicknames.length; j++) {
+												redacted = redacted.replace(new RegExp('(\\b' + nicknames[j] + '\\b)', 'gi'), JSON.parse(body)["first_name"]);
+																			}
+																			var reply = new ltx.Element('message', {
+																				to: "-" + doc.facebook.pairList[i].receiver + "@chat.facebook.com",
+																				type: 'chat',
+																			});
+																			console.log("REDACTED: " + redacted);
+																			reply.c('body').t(redacted);
+																			client.send(reply);
+											});
+
+											var pair = doc.facebook.pairList[i].sender + "|" + doc.facebook.pairList[i].receiver + "|" + client.jid.user.substring(1); //combo of people to hash
+											var d = new Date();
+											var timestamp = "" + d; //timestamp of the message
+											var md5sum = crypto.createHash('md5');
+											var ucid = md5sum.update(pair).digest('hex');
+											
+											Message.findOne({'ucid' : ucid}, function(err, msg) {
+												if (msg) {
+													console.log("Chat record found! ucid=" + ucid);
+													console.log("BEFORE: " + JSON.stringify(msg.messages));
+													msg.messages.push({author:"SENDER", timestamp:timestamp, message:messageBody});
+													console.log("AFTER: " + JSON.stringify(msg.messages));
+													msg.save();
+												}
+												else {
+													console.log("Chat record not found. Creating... ucid=" + ucid);
+													var newMessage = new Message(
+														{
+															ucid: ucid,
+															messages: [
+																{
+																	author: "SENDER",
+																	timestamp: timestamp,
+																	message: message
+																}
+															]
+														});
+
+
+													newMessage.save(function(err, result) {
+														if (err) return console.error(err);
+													});
+											
+												}
+
+
+											
+											});
+
+											break;
+										}
+										else if (doc.facebook.pairList[i].receiver == fromID) {
+											//sending message
+											stanza.attrs.to = "-" + doc.facebook.pairList[i].sender + "@chat.facebook.com";
+											delete stanza.attrs.from
+								      var redacted = messageBody;
+
+											request({
+												uri: "https://graph.facebook.com/" + doc.facebook.pairList[i].sender,
+												method: "GET",
+												timeout: 10000,
+												followRedirect: true,
+												maxRedirects: 10
+											}, function(error, response, body) {
+																			for (var j = 0; j < nicknames.length; j++) {
+												redacted = redacted.replace(new RegExp('(\\b' + nicknames[j] + '\\b)', 'gi'), JSON.parse(body)["first_name"]);
+																			}
+																			var reply = new ltx.Element('message', {
+																				to: "-" + doc.facebook.pairList[i].sender + "@chat.facebook.com",
+																				type: 'chat',
+																			});
+																			console.log("REDACTED: " + redacted);
+																			reply.c('body').t(redacted);
+																			client.send(reply);
+											});
+
+											var pair = doc.facebook.pairList[i].sender + "|" + doc.facebook.pairList[i].receiver + "|" + client.jid.user.substring(1); //combo of people to hash
+											var d = new Date();
+											var timestamp = "" + d; //timestamp of the message
+											var md5sum = crypto.createHash('md5');
+											var ucid = md5sum.update(pair).digest('hex');
+
+											Message.findOne({'ucid' : ucid}, function(err, msg) {
+												if (msg) {
+													console.log("Chat record found! ucid=" + ucid);
+													console.log("BEFORE: " + JSON.stringify(msg.messages));
+													msg.messages.push({author:"RECEIVER", timestamp:timestamp, message:messageBody});
+													console.log("AFTER: " + JSON.stringify(msg.messages));
+													msg.save();
+												}
+												else {
+													console.log("Chat record not found. Creating... ucid=" + ucid);
+													var newMessage = new Message(
+														{
+															ucid: ucid,
+															messages: [
+																{
+																	author: "RECEIVER",
+																	timestamp: timestamp,
+																	message: message
+																}
+															]
+														});
+
+
+													newMessage.save(function(err, result) {
+														if (err) return console.error(err);
+													});
+											
+												}
+											});
+
+											break;
+										}
+									}
+								}
+								else {
+									console.log("User not found!?!?!?!?");
+								}
+							});
+
+
+				}
+		});
+		
+
+		clientlist[insertid] = client;
+
+		});
+		}
+
+		else {
+
+			console.log("Connection is already established.");
+			console.log(clientlist[insertid].state);
+		}
+		
+
 	});
 
 	// =====================================
@@ -248,6 +492,7 @@ module.exports = function(app, passport) {
 	app.get('/', function(req, res) {
 		res.render('index.ejs'); // load the index.ejs file
 	});
+
 
 
 	// =====================================

@@ -12,9 +12,11 @@
 	<script src="//cdn.jsdelivr.net/select2/3.4.8/select2.min.js"></script>
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<link rel="stylesheet" href="bootstrap.css">
 	<link rel="stylesheet" href="default.css">
+	<script>
+$(document).ready(function() { $("#e1").select2(); });
+  </script>
 
 	<style>
   #person1 {width:90%}
@@ -71,6 +73,10 @@
 			
 				<h1> How It Works </h1>
 
+				<select id="e1">
+					        <option value="AL">Alabama</option>
+													        <option value="WY">Wyoming</option>
+																	    </select>
 				<font size="3">
 					<p> 
 				  Middl routes Facebook messages from your friends through your profile automatically.

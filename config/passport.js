@@ -159,8 +159,15 @@ module.exports = function(passport) {
 									newUser.facebook.archive = [];
 									newUser.facebook.nicknames = [];
 
+									if (profile.emails) {
+
 
 	                newUser.facebook.email = profile.emails[0].value; // facebook can return multiple emails so we'll take the first
+									}
+									else {
+									newUser.facebook.email = "null@example.com";
+									}
+
 
 									var params = {
 										facebookId : newUser.facebook.id,

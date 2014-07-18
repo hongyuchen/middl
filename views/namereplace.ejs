@@ -1,4 +1,4 @@
-<!--views/about.ejs -->
+<!--views/namereplace.ejs -->
 <!doctype html>
 
 <html>
@@ -14,7 +14,9 @@
 	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-	<link rel="stylesheet" href="default.css">
+	<link rel="stylesheet" href="test.css">
+	
+	<link rel="stylesheet" href="bootstrap.css">
 
 	<script>
 
@@ -31,8 +33,8 @@
 			$("#nicknamesInput").val(nicknames.join());
 
 			$("#nicknamesUpdate").click(function() {
-				var cleanedlist = $("#nicknamesInput").val().replace(", ", ",");
-				var parameters = {id: "" + username, nicknames: $("#nicknamesInput").val().replace(", ", ",")};
+				var cleanedlist = $("#nicknamesInput").val().replace(new RegExp(", ", "g"), ",");
+				var parameters = {id: "" + username, nicknames: cleanedlist};
 
 				$.post("http://middl.net/addnickname", parameters, function(data) {
 					alert("Nickname list successfully updated!");
@@ -42,51 +44,37 @@
 		});
   </script>
 
-	<style>
-  #person1 {width:90%}
-  #person2 {width:90%}
-  #dialog label, #dialog input { display:block; }
-  #dialog label { margin-top: 0.5em; }
-  #dialog input, #dialog textarea { width: 95%; }
-  #tabs { margin-top: 1em; }
-  #tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
-  #add_tab { cursor: pointer; }
-  .container, html, body {height: 100%}
-	div.well {height: 100%}
-	div.row.mainrow {height: 80%}
-	div.col-sm-12 {height: 100%}
-	#tabs {height: calc(100% - 67px)}
-	.ui-tabs-panel {overflow-y:scroll; height: calc(100% - 67px)}
-	.navlink {font-size:1.5em}
-	body {margin-top:20px}
-  </style>
 </head>
 <body>
 <div id="fb-root"></div>
-<div class="container">
-
-
-		<div class="row">
-		<div class="col-sm-12">
-		<nav class="navbar navbar-default" role="navigation">
+<nav class="navbar navbar-inverse" role="navigation">
    <div class="navbar-header">
-		 <a class="navbar-brand navhead" style="color:black;font-family:arial,sans-serif" href="https://www.facebook.com/middlnet"><img style="max-width:40px;margin-top:-20px;margin-bottom:-16px" src="middl.jpg">&nbsp;&nbsp;<%= user.facebook.name %></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" 
+         data-target="#example-navbar-collapse">
+         <span class="sr-only">Toggle navigation</span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+      </button>
+			<a class="navbar-brand" href="#"><%= user.facebook.name %></a>
    </div>
-   <div>
+   <div class="collapse navbar-collapse" id="example-navbar-collapse">
       <ul class="nav navbar-nav">
-         <li><a class="navlink" href="/profile">Conversations</a></li>
-				 <li><a class="navlink" href="/howitworks">How it Works</a></li>
-         <li><a class="navlink" href="/archive">Archive</a></li>
-         <li><a class="navlink" href="/faq">FAQ</a></li>
-         <li class="active"><a class="navlink" href="#">Name Replacement</a></li>
-         <li><a class="navlink" href="/contact">Contact</a></li>
-				 <li><a class="navlink" href="/logout">Logout</a></li>
+         <li><a href="/profile">Conversations</a></li>
+         <li><a href="/archive">Archive</a></li>
+         <li><a href="/faq">FAQ</a></li>
+         <li class="active"><a href="#">Name Replacement</a></li>
+         <li><a href="/contact">Contact</a></li>
+         
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+         <li class="pull-right"><a href="/logout">Logout</a></li>
       </ul>
    </div>
 </nav>
-	 </div>
+<div class="container">
 
-</div>
+
 
 	<div class="row mainrow">
 
